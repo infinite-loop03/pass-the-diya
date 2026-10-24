@@ -1,0 +1,18 @@
+{
+  "name": "pass-the-diya",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Light a diya only from someone else's flame, then pass it on.",
+  "scripts": {
+    "dev": "wrangler d1 migrations apply pass-the-diya --local && wrangler dev --test-scheduled",
+    "deploy": "node scripts/check-url.mjs && wrangler d1 migrations apply pass-the-diya --remote && wrangler deploy",
+    "set-url": "node scripts/set-url.mjs",
+    "typecheck": "tsc",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261023.1",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.152.0"
+  }
+}

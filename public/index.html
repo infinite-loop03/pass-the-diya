@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Pass the Diya</title>
+  <meta name="description" content="This diya can't light itself. Someone has to pass you their flame. Hold to light yours, then pass it on.">
+  <meta name="theme-color" content="#1A1238">
+
+  <!-- Link previews (WhatsApp, Instagram, X). Run `npm run set-url -- https://your-url` so these are absolute. -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Someone passed you a flame">
+  <meta property="og:description" content="Hold your diya to light it, then pass it on. No app, no login.">
+  <meta property="og:url" content="https://diya.pass-the-diya.workers.dev/">
+  <meta property="og:image" content="https://diya.pass-the-diya.workers.dev/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/fonts/yatra-one-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/mukta-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/js/app.js"></script>
+</head>
+<body data-state="loading">
+  <!-- Shared gradients for every diya drawn on the page -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="g-clay" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#C8622E"/>
+        <stop offset=".55" stop-color="#963C18"/>
+        <stop offset="1" stop-color="#55200B"/>
+      </linearGradient>
+      <linearGradient id="g-rim" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#E08447"/>
+        <stop offset="1" stop-color="#A9481E"/>
+      </linearGradient>
+      <radialGradient id="g-oil" cx=".5" cy=".35" r=".7">
+        <stop offset="0" stop-color="#4A2D14"/>
+        <stop offset="1" stop-color="#22130A"/>
+      </radialGradient>
+      <radialGradient id="g-glint" cx=".5" cy=".4" r=".6">
+        <stop offset="0" stop-color="#FFE39A" stop-opacity=".95"/>
+        <stop offset=".6" stop-color="#FFB13B" stop-opacity=".45"/>
+        <stop offset="1" stop-color="#FF8A1F" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="g-flame" cx=".5" cy=".78" r=".75">
+        <stop offset="0" stop-color="#FFF1C2"/>
+        <stop offset=".38" stop-color="#FFCB4A"/>
+        <stop offset=".78" stop-color="#FF8A1F"/>
+        <stop offset="1" stop-color="#E24A16"/>
+      </radialGradient>
+      <radialGradient id="g-core" cx=".5" cy=".72" r=".7">
+        <stop offset="0" stop-color="#FFFFFF"/>
+        <stop offset=".6" stop-color="#FFF7DC"/>
+        <stop offset="1" stop-color="#FFE08A"/>
+      </radialGradient>
+      <radialGradient id="g-halo" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#FFC45A" stop-opacity=".6"/>
+        <stop offset=".45" stop-color="#FF9A2E" stop-opacity=".2"/>
+        <stop offset="1" stop-color="#FF8A1F" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+  </svg>
+
+  <canvas class="globe" id="skyMap" role="img" aria-label="A globe with a light for every city where diyas are lit. Drag to spin it."></canvas>
+  <div class="counter" role="status" aria-live="polite">
+    <span class="counter-num" id="counterNum">0</span>
+    <span class="counter-label" id="counterLabel">diyas lit</span>
+  </div>
+
+  <header class="top">
+    <span class="brand">Pass the Diya</span>
+    <span class="greeting" lang="hi">शुभ दीपावली</span>
+  </header>
+
+  <main class="stage">
+    <section class="incoming" id="incoming" hidden>
+      <div class="diya diya--small is-lit" id="theirDiya"></div>
+      <p class="incoming-from" id="incomingFrom"></p>
+    </section>
+
+    <ol class="trail" id="trail" aria-label="Where this flame has travelled" hidden></ol>
+
+    <button class="diya diya--mine" id="myDiya" type="button" aria-describedby="sub">
+      <svg class="hold-ring" viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r="47" pathLength="100"/>
+      </svg>
+    </button>
+
+    <div class="copy">
+      <h1 id="headline">Pass the Diya</h1>
+      <p id="sub"></p>
+    </div>
+
+    <div class="actions" id="litActions" hidden>
+      <button class="btn btn--primary" id="shareBtn" type="button">Pass your flame</button>
+      <a class="btn" id="whatsappBtn" target="_blank" rel="noopener">Pass it on WhatsApp</a>
+      <button class="btn" id="qrBtn" type="button">Pass it in person</button>
+    </div>
+
+    <div class="actions" id="emptyActions" hidden>
+      <a class="btn btn--primary" id="borrowBtn" href="/">Borrow from the first diya</a>
+    </div>
+
+  </main>
+
+
+  <dialog class="sheet sheet--qr" id="qrDialog" aria-labelledby="qrTitle">
+    <div class="sheet-body">
+      <div class="diya diya--qr is-lit" id="qrDiya"></div>
+      <div class="qr-card" id="qrCode" role="img" aria-label="QR code for your flame"></div>
+      <h2 id="qrTitle">Hold this up to another phone</h2>
+      <p>When they scan it, your flame passes to their diya.</p>
+      <button class="btn" type="button" data-close>Done</button>
+    </div>
+  </dialog>
+
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

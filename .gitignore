@@ -1,0 +1,6 @@
+node_modules/
+.wrangler/
+# .dev.vars holds no secrets here (it only turns on fake cities for local testing), so it is committed.
+.env*
+.dev.vars.*
+.DS_Store

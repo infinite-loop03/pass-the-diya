@@ -1,0 +1,37 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "diya",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+
+  // The page, fonts and images are static assets: free, unlimited, and they keep
+  // working even when the free daily API quota runs out. Only /api/* runs the Worker.
+  "assets": {
+    "directory": "./public",
+    "run_worker_first": ["/api/*"]
+  },
+
+  // One small SQLite database: a counter per city, plus one cached snapshot row.
+  // Run `npx wrangler d1 create pass-the-diya` and paste the id it prints below.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "pass-the-diya",
+      "database_id": "319f9c6c-72c5-4de7-8005-1c64fd9e8885",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // Rebuild the night-sky snapshot every 3 minutes. This keeps database reads flat
+  // no matter how many people open the map.
+  "triggers": { "crons": ["*/3 * * * *"] },
+
+  "vars": {
+    // Local testing only: assigns random Indian cities so the map has something to show.
+    // .dev.vars switches it on for `wrangler dev`; it stays "false" in production.
+    "DEV_FAKE_GEO": "false"
+  },
+
+  // We don't keep request logs. The privacy line on the page depends on this.
+  "observability": { "enabled": false }
+}
